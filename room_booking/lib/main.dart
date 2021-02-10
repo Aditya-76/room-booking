@@ -35,6 +35,7 @@ class Home extends StatelessWidget {
                 }              
               },
               child: Text('11:00 to 12:00'),
+              color: Colors.blue[500],
             ),
             new FlatButton(
               onPressed: () => {
@@ -55,6 +56,7 @@ class Home extends StatelessWidget {
                 }  
               },
               child: Text('12:00 to 13:00'),
+              color: Colors.blue[500],
             ),
             new FlatButton(
               onPressed: () => {
@@ -75,6 +77,7 @@ class Home extends StatelessWidget {
                 }  
               },
               child: Text('13:00 to 14:00'),
+              color: Colors.blue[500],
             ),
           ],
         ));
