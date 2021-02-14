@@ -74,15 +74,16 @@ class _MyCustomFormState extends State<MyCustomForm> {
         // When the user presses the button, show an alert dialog containing
         // the text that the user has entered into the text field.
         onPressed: () {
-          print(myController1.text);
-          print(myController2.text);
-          print(myController3.text);
+          //print(myController1.text);
+          //print(myController2.text);
+          //print(myController3.text);
           String date = myController1.text;
           print(date);
           String starttime = myController2.text;
           print(starttime);
           String endtime = myController3.text;
           print(endtime);
+          checkerMan(date, starttime, endtime);
           /*return showDialog(
             context: context,
             builder: (context) {
@@ -103,10 +104,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
   }
 }
 
-var volleyRoom1 = <num, bool>{
-  11: true,
-  12: true,
-  13: true,
+var volleyRoom1 = <List, bool>{
+  ['11:00', '12:00'] : true,
 };
 
 var volleyRoom2 = <num, bool>{
@@ -120,3 +119,12 @@ var volleyRoom3 = <num, bool>{
   12: true,
   13: true,
 };
+
+var volleyRoomStart1 = <String, bool>{
+  '11:00' : true,
+};
+
+void checkerMan(String date, String starttime, String endtime){
+  print(volleyRoom1);
+  print(volleyRoomStart1['11:00']);
+}
