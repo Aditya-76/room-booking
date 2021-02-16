@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+// ignore: implementation_imports
 import 'package:flutter/src/widgets/basic.dart';
 
 void main() {
@@ -29,8 +30,7 @@ class MyCustomForm extends StatefulWidget {
 // Define a corresponding State class.
 // This class holds the data related to the Form.
 class _MyCustomFormState extends State<MyCustomForm> {
-  // Create a text controller and use it to retrieve the current value
-  // of the TextField.
+  // Create a text controller and use it to retrieve the current value of the TextField.
   final myController1 = TextEditingController();
   final myController2 = TextEditingController();
   final myController3 = TextEditingController();
@@ -39,6 +39,8 @@ class _MyCustomFormState extends State<MyCustomForm> {
   void dispose() {
     // Clean up the controller when the widget is disposed.
     myController1.dispose();
+    myController2.dispose();
+    myController3.dispose();
     super.dispose();
   }
 
@@ -46,44 +48,59 @@ class _MyCustomFormState extends State<MyCustomForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Retrieve Text Input'),
+        title: Text('Volleyball Rooms'),
+        centerTitle: true,
+        backgroundColor: Colors.blue[700],
       ),
       body: Column(
         children: <Widget>[
-          Padding(
+          Container(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: myController1,
+              decoration: InputDecoration(
+                labelText: "Enter Name",
+                border: OutlineInputBorder(),
+                icon: Icon(Icons.person),
+              ),
             ),
           ),
-          Padding(
+          Container(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: myController2,
+              decoration: InputDecoration(
+                labelText: "Enter Starting Time",
+                hintText: "01 February 2021, 00:00",
+                border: OutlineInputBorder(),
+                icon: Icon(Icons.calendar_today_rounded),
+              ),
             ),
           ),
-          Padding(
+          Container(
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: myController3,
+              decoration: InputDecoration(
+                labelText: "Enter Ending Time",
+                hintText: "01 February 2021, 10:00",
+                border: OutlineInputBorder(),
+                icon: Icon(Icons.calendar_today_rounded),
+              ),
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        // When the user presses the button, show an alert dialog containing
-        // the text that the user has entered into the text field.
+        // When the user presses the button, show an alert dialog containing the text that the user has entered into the text field.
         onPressed: () {
-          //print(myController1.text);
-          //print(myController2.text);
-          //print(myController3.text);
-          String date = myController1.text;
-          print(date);
+          String name = myController1.text;
+          print(name);
           String starttime = myController2.text;
           print(starttime);
           String endtime = myController3.text;
           print(endtime);
-          checkerMan(date, starttime, endtime);
+          roomChecker(name, starttime, endtime);
           /*return showDialog(
             context: context,
             builder: (context) {
@@ -97,7 +114,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
         },
         tooltip: 'Show me the value!',
         child: Text(
-          'Submit', 
+          'Book', 
         ),
       ),
     );
@@ -124,7 +141,30 @@ var volleyRoomStart1 = <String, bool>{
   '11:00' : true,
 };
 
-void checkerMan(String date, String starttime, String endtime){
+void checkerMan(String name, String starttime, String endtime){
   print(volleyRoom1);
   print(volleyRoomStart1['11:00']);
+    
+  var now = DateTime.now();
+  print(now);
 }
+
+var rooms = <String, List>{
+  "Room 1": [],
+  "Room 2": [],
+  "Room 3": [],
+};
+
+void roomChecker(String name, String starttime, String endtime){
+  var start = DateTime.parse(starttime);
+  print(start);
+  var end = DateTime.parse(endtime);
+  print(end);
+
+}
+
+/*
+if(((element[0] < start) < element[1]) || ((element[0] < end) < element[1]) || (((element[0] < start) < end) < element[1])){
+          
+}
+*/
