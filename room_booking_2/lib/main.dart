@@ -101,14 +101,21 @@ class _MyCustomFormState extends State<MyCustomForm> {
           String endtime = myController3.text;
           print(endtime);
           int roomNumber = roomChecker(name, starttime, endtime);
-          /*return showDialog(
+          return showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
-                content: Text("Room no $roomNumber has been booked."),
+                content: Text(((){
+                  if(roomNumber != 0){
+                    return "Room no $roomNumber has been booked.";
+                  }
+                  else{
+                    return "Room cannot be booked. Try another slot";
+                  }
+                }())),
               );
             },
-          );*/
+          );
         },
         tooltip: 'Show me the value!',
         child: Text(
@@ -125,17 +132,20 @@ var rooms = <num, List>{
   3: [],
 };
 
+int micros = 1;
+
 int roomChecker(String name, String starttime, String endtime){
-  var start = DateTime.parse(starttime);  print(start);
-  var end = DateTime.parse(endtime); print(end);
+  var start = DateTime.parse(starttime);  
+  //Adding microseconds to prevent isAfter from not working as intended
+  start = start.add(new Duration(microseconds: micros));
+  print(start);
+  var end = DateTime.parse(endtime); 
+  //Adding microseconds to prevent isAfter from not working as intended
+  end = end.add(new Duration(microseconds: micros));
+  print(end);
+  micros += 1;
 
   print("");
-  print("Output for Admins:-");
-  print(rooms[1]); 
-  print(rooms[2]); 
-  print(rooms[3]);  
-  print("");
-
   int flagAdded = 0;
   int flagRoom = -1;
   for(var i = 1; i < 4; i++){
@@ -157,13 +167,13 @@ int roomChecker(String name, String starttime, String endtime){
     }
   }
 
-  print("Output for User:");
+  print("Output for User:-");
   if(flagAdded != 0){
     print("Room number $flagAdded booked");
     print("");
   }
   else{
-    print("Room cannot be booked");
+    print("Room cannot be booked. Try another slot.");
     print("");
   }
 
