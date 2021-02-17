@@ -71,7 +71,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
               controller: myController2,
               decoration: InputDecoration(
                 labelText: "Enter Starting Time",
-                hintText: "01 February 2021, 00:00",
+                hintText: "2021-02-21 10:00:00",
                 border: OutlineInputBorder(),
                 icon: Icon(Icons.calendar_today_rounded),
               ),
@@ -83,7 +83,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
               controller: myController3,
               decoration: InputDecoration(
                 labelText: "Enter Ending Time",
-                hintText: "01 February 2021, 10:00",
+                hintText: "2021-02-21 11:00:00",
                 border: OutlineInputBorder(),
                 icon: Icon(Icons.calendar_today_rounded),
               ),
@@ -100,14 +100,12 @@ class _MyCustomFormState extends State<MyCustomForm> {
           print(starttime);
           String endtime = myController3.text;
           print(endtime);
-          roomChecker(name, starttime, endtime);
+          int roomNumber = roomChecker(name, starttime, endtime);
           /*return showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
-                // Retrieve the text the that user has entered by using the
-                // TextEditingController.
-                content: Text(myController1.text),
+                content: Text("Room no $roomNumber has been booked."),
               );
             },
           );*/
@@ -121,50 +119,59 @@ class _MyCustomFormState extends State<MyCustomForm> {
   }
 }
 
-var volleyRoom1 = <List, bool>{
-  ['11:00', '12:00'] : true,
+var rooms = <num, List>{
+  1: [],
+  2: [],
+  3: [],
 };
 
-var volleyRoom2 = <num, bool>{
-  11: true,
-  12: true,
-  13: true,
-};
+int roomChecker(String name, String starttime, String endtime){
+  var start = DateTime.parse(starttime);  print(start);
+  var end = DateTime.parse(endtime); print(end);
 
-var volleyRoom3 = <num, bool>{
-  11: true,
-  12: true,
-  13: true,
-};
+  print("");
+  print("Output for Admins:-");
+  print(rooms[1]); 
+  print(rooms[2]); 
+  print(rooms[3]);  
+  print("");
 
-var volleyRoomStart1 = <String, bool>{
-  '11:00' : true,
-};
+  int flagAdded = 0;
+  int flagRoom = -1;
+  for(var i = 1; i < 4; i++){
+    flagRoom = -1;
+    for(var j = 0; j < rooms[i].length; j++){
+      if(((start.isAfter(rooms[i][j][0])) && start.isBefore(rooms[i][j][1])) || ((end.isAfter(rooms[i][j][0])) && end.isBefore(rooms[i][j][1])) || (((start.isAfter(rooms[i][j][0])) && start.isBefore(end)) && end.isBefore(rooms[i][j][1]))){
+        flagRoom = j;
+        break;
+      }
+      else{
+        continue;
+      }
+    }
 
-void checkerMan(String name, String starttime, String endtime){
-  print(volleyRoom1);
-  print(volleyRoomStart1['11:00']);
-    
-  var now = DateTime.now();
-  print(now);
+    if(flagRoom == -1){
+      rooms[i] = rooms[i] + [[start,end]];
+      flagAdded = i;
+      break;
+    }
+  }
+
+  print("Output for User:");
+  if(flagAdded != 0){
+    print("Room number $flagAdded booked");
+    print("");
+  }
+  else{
+    print("Room cannot be booked");
+    print("");
+  }
+
+  print("Output for Admins:-");
+  print(rooms[1]); 
+  print(rooms[2]); 
+  print(rooms[3]);  
+  print("");
+
+  return flagAdded;
 }
-
-var rooms = <String, List>{
-  "Room 1": [],
-  "Room 2": [],
-  "Room 3": [],
-};
-
-void roomChecker(String name, String starttime, String endtime){
-  var start = DateTime.parse(starttime);
-  print(start);
-  var end = DateTime.parse(endtime);
-  print(end);
-
-}
-
-/*
-if(((element[0] < start) < element[1]) || ((element[0] < end) < element[1]) || (((element[0] < start) < end) < element[1])){
-          
-}
-*/
