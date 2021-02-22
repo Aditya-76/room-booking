@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 // ignore: implementation_imports
 import 'package:flutter/src/widgets/basic.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 void main() {
   runApp(MaterialApp(
@@ -171,6 +173,9 @@ int roomChecker(String name, String starttime, String endtime){
   if(flagAdded != 0){
     print("Room number $flagAdded booked");
     print("");
+    String roomi = "$flagAdded";
+    print(roomi);
+    ssubmitForm(name, starttime, endtime, roomi);
   }
   else{
     print("Room cannot be booked. Try another slot.");
@@ -184,4 +189,73 @@ int roomChecker(String name, String starttime, String endtime){
   print("");
 
   return flagAdded;
+}
+
+class TimeForm {
+  String name;
+  String start;
+  String end;
+  String room;
+
+  TimeForm(this.name, this.start, this.end, this.room);
+
+  factory TimeForm.fromJson(dynamic json) {
+    return TimeForm("${json['name']}", "${json['start']}", "${json['end']}", "${json['room']}");
+  }
+
+  // Method to make GET parameters.
+  Map toJson() => {
+        'name': name,
+        'start': start,
+        'end': end,
+        'room' : room
+      };
+}
+
+class FormController {  
+  // Google App Script Web URL.
+  static const String URL = "https://script.google.com/macros/s/AKfycbwcL7DLnLHjLoWAxWrNjVs_iLZTLyd69OpfIrd1CEyDIZo7wA7YPoWlqQ/exec";
+  
+  // Success Status Message
+  static const STATUS_SUCCESS = "SUCCESS";
+
+  /// Async function which saves feedback, parses form parameters and sends HTTP GET request on url. On successful response, callback is called.
+  void submitForm( TimeForm timeform, void Function(String) callback) async {
+    try {
+      await http.post(URL, body: timeform.toJson()).then((response) async {
+        if (response.statusCode == 302) {
+          var url = response.headers['location'];
+          print(url);
+          await http.get(url).then((response) {
+            callback(convert.jsonDecode(response.body)['status']);
+          });
+        } else {
+          //print("yo");
+          //print(response.body);
+          callback(convert.jsonDecode(response.body)['status']);
+        }
+      });
+    } catch (e) {
+      print(e);
+      //print("meow");
+    }
+  }
+}
+
+void ssubmitForm(String name, String start, String end, String room) {
+  TimeForm timeform = TimeForm(name, start, end, room);
+
+  FormController formController = FormController();
+
+  // Submit 'timeform' and save it in Google Sheets.
+  formController.submitForm(timeform, (String response) {
+    print("Response: $response");
+    if (response == FormController.STATUS_SUCCESS) {
+      // Feedback is saved succesfully in Google Sheets.
+      print("Feedback Submitted");
+    } else {
+      // Error Occurred while saving data in Google Sheets.
+      print("Error Occurred!");
+    }
+  });
 }
