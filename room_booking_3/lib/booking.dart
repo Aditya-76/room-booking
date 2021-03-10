@@ -28,9 +28,9 @@ class MyCustomForm extends StatefulWidget {
 // This class holds the data related to the Form.
 class _MyCustomFormState extends State<MyCustomForm> {
   // Create a text controller and use it to retrieve the current value of the TextField.
-  final myController1 = TextEditingController();
-  final myController2 = TextEditingController();
-  final myController3 = TextEditingController();
+  final myController1 = TextEditingController(); // Name
+  final myController2 = TextEditingController(); // Start Time
+  final myController3 = TextEditingController(); // End Time
 
   @override
   void dispose() {
@@ -57,7 +57,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
                 fontWeight: FontWeight.bold,
                 color: Colors.blue[500],
                 fontSize: 20,
-              ),        
+              ),
             ),
           ),
           Container(
@@ -101,11 +101,11 @@ class _MyCustomFormState extends State<MyCustomForm> {
         // When the user presses the button, show an alert dialog containing the text that the user has entered into the text field.
         onPressed: () {
           String name = myController1.text;
-          print(name);
+          //print(name);
           String starttime = myController2.text;
-          print(starttime);
+          //print(starttime);
           String endtime = myController3.text;
-          print(endtime);
+          //print(endtime);
           int roomNumber = roomChecker(name, starttime, endtime);
           return showDialog(
             context: context,
@@ -113,10 +113,10 @@ class _MyCustomFormState extends State<MyCustomForm> {
               return AlertDialog(
                 content: Text(((){
                   if(roomNumber != 0){
-                    return "Room no $roomNumber has been booked.";
+                    return dropdownvalue + " room no $roomNumber has been booked.";
                   }
                   else{
-                    return "Room cannot be booked. Try another slot";
+                    return dropdownvalue + " room is already booked for the time slot you chose. Try another slot";
                   }
                 }())),
               );
@@ -132,10 +132,11 @@ class _MyCustomFormState extends State<MyCustomForm> {
   }
 }
 
-var rooms = <num, List>{
-  1: [],
-  2: [],
-  3: [],
+var rooms = <String, Map> {
+  'Football' : {1: [], 2: [], 3: []},
+  'Squash' : {1: [], 2: [], 3: []}, 
+  'Table Tennis': {1: [], 2: [], 3: []},
+  'Basketball' : {1: [], 2: [], 3: []},
 };
 
 int micros = 1;
@@ -144,11 +145,11 @@ int roomChecker(String name, String starttime, String endtime){
   var start = DateTime.parse(starttime);  
   //Adding microseconds to prevent isAfter from not working as intended
   start = start.add(new Duration(microseconds: micros));
-  print(start);
+  //print(start);
   var end = DateTime.parse(endtime); 
   //Adding microseconds to prevent isAfter from not working as intended
   end = end.add(new Duration(microseconds: micros));
-  print(end);
+  //print(end);
   micros += 1;
 
   print("");
@@ -156,8 +157,8 @@ int roomChecker(String name, String starttime, String endtime){
   int flagRoom = -1;
   for(var i = 1; i < 4; i++){
     flagRoom = -1;
-    for(var j = 0; j < rooms[i].length; j++){
-      if(((start.isAfter(rooms[i][j][0])) && start.isBefore(rooms[i][j][1])) || ((end.isAfter(rooms[i][j][0])) && end.isBefore(rooms[i][j][1])) || (((start.isAfter(rooms[i][j][0])) && start.isBefore(end)) && end.isBefore(rooms[i][j][1]))){
+    for(var j = 0; j < rooms[dropdownvalue][i].length; j++){
+      if(((start.isAfter(rooms[dropdownvalue][i][j][0])) && start.isBefore(rooms[dropdownvalue][i][j][1])) || ((end.isAfter(rooms[dropdownvalue][i][j][0])) && end.isBefore(rooms[dropdownvalue][i][j][1])) || (((start.isAfter(rooms[dropdownvalue][i][j][0])) && start.isBefore(end)) && end.isBefore(rooms[dropdownvalue][i][j][1]))){
         flagRoom = j;
         break;
       }
@@ -167,7 +168,7 @@ int roomChecker(String name, String starttime, String endtime){
     }
 
     if(flagRoom == -1){
-      rooms[i] = rooms[i] + [[start,end]];
+      rooms[dropdownvalue][i] = rooms[dropdownvalue][i] + [[start,end]];
       flagAdded = i;
       break;
     }
@@ -175,26 +176,28 @@ int roomChecker(String name, String starttime, String endtime){
 
   print("Output for User:-");
   if(flagAdded != 0){
-    print("Room number $flagAdded booked");
+    print(dropdownvalue + " room number $flagAdded booked");
     print("");
+    //print(rooms[dropdownvalue][1]);
     String roomi = "$flagAdded";
-    print(roomi);
+    //print(roomi);
     ssubmitForm(name, starttime, endtime, roomi);
 
-    print(dropdownvalue);
-    print(dropdownvalue2);
+    //print(dropdownvalue);
+    //print(dropdownvalue2);
   }
   else{
     print("Room cannot be booked. Try another slot.");
     print("");
   }
 
+  print("****************************");
   print("Output for Admins:-");
-  print(rooms[1]); 
-  print(rooms[2]); 
-  print(rooms[3]);  
+  print(rooms[dropdownvalue][1]); 
+  print(rooms[dropdownvalue][2]); 
+  print(rooms[dropdownvalue][3]);  
   print("");
-
+  print("****************************");
   return flagAdded;
 }
 
@@ -203,11 +206,13 @@ class TimeForm {
   String start;
   String end;
   String room;
+  String sport;
+  String type;
 
-  TimeForm(this.name, this.start, this.end, this.room);
+  TimeForm(this.name, this.start, this.end, this.room, this.sport, this.type);
 
   factory TimeForm.fromJson(dynamic json) {
-    return TimeForm("${json['name']}", "${json['start']}", "${json['end']}", "${json['room']}");
+    return TimeForm("${json['name']}", "${json['start']}", "${json['end']}", "${json['room']}", "${json['sport']}", "${json['type']}");
   }
 
   // Method to make GET parameters.
@@ -215,7 +220,9 @@ class TimeForm {
         'name': name,
         'start': start,
         'end': end,
-        'room' : room
+        'room' : room,
+        'sport' : sport,
+        'type' : type
       };
 }
 
@@ -232,7 +239,7 @@ class FormController {
       await http.post(URL, body: timeform.toJson()).then((response) async {
         if (response.statusCode == 302) {
           var url = response.headers['location'];
-          print(url);
+          //print(url);
           await http.get(url).then((response) {
             callback(convert.jsonDecode(response.body)['status']);
           });
@@ -250,7 +257,7 @@ class FormController {
 }
 
 void ssubmitForm(String name, String start, String end, String room) {
-  TimeForm timeform = TimeForm(name, start, end, room);
+  TimeForm timeform = TimeForm(name, start, end, room, dropdownvalue, dropdownvalue2);
 
   FormController formController = FormController();
 
@@ -259,7 +266,7 @@ void ssubmitForm(String name, String start, String end, String room) {
     print("Response: $response");
     if (response == FormController.STATUS_SUCCESS) {
       // Feedback is saved succesfully in Google Sheets.
-      print("Feedback Submitted");
+      print("Data Submitted");
     } else {
       // Error Occurred while saving data in Google Sheets.
       print("Error Occurred!");
