@@ -10,7 +10,7 @@ class Booking extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Room Booking'),
+          title: Text('Booking System'),
           centerTitle: true,
         ),
         body: MyCustomForm(),
