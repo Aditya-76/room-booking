@@ -106,7 +106,7 @@ class _MyCustomFormState extends State<MyCustomForm> {
           //print(starttime);
           String endtime = myController3.text;
           //print(endtime);
-          int roomNumber = roomChecker(name, starttime, endtime);
+          int roomNumber = roomChecker(name, starttime, endtime, 'Y');
           return showDialog(
             context: context,
             builder: (context) {
@@ -142,7 +142,8 @@ var rooms = <String, Map>{
 
 int micros = 1;
 
-int roomChecker(String name, String starttime, String endtime) {
+int roomChecker(
+    String name, String starttime, String endtime, String approval) {
   var start = DateTime.parse(starttime);
   //Adding microseconds to prevent isAfter from not working as intended
   start = start.add(new Duration(microseconds: micros));
@@ -173,13 +174,15 @@ int roomChecker(String name, String starttime, String endtime) {
       }
     }
 
-    if (flagRoom == -1) {
-      rooms[dropdownvalue][i] = rooms[dropdownvalue][i] +
-          [
-            [start, end]
-          ];
-      flagAdded = i;
-      break;
+    if (approval == 'Y') {
+      if (flagRoom == -1) {
+        rooms[dropdownvalue][i] = rooms[dropdownvalue][i] +
+            [
+              [start, end]
+            ];
+        flagAdded = i;
+        break;
+      }
     }
   }
 
@@ -190,7 +193,7 @@ int roomChecker(String name, String starttime, String endtime) {
     //print(rooms[dropdownvalue][1]);
     String roomi = "$flagAdded";
     //print(roomi);
-    ssubmitForm(name, starttime, endtime, roomi);
+    ssubmitForm(name, starttime, endtime, roomi, 'Y');
 
     //print(dropdownvalue);
     //print(dropdownvalue2);
@@ -216,22 +219,31 @@ class TimeForm {
   String room;
   String sport;
   String type;
+  String approval;
 
-  TimeForm(this.name, this.start, this.end, this.room, this.sport, this.type);
+  TimeForm(this.name, this.start, this.end, this.room, this.sport, this.type,
+      this.approval);
 
   factory TimeForm.fromJson(dynamic json) {
-    return TimeForm("${json['name']}", "${json['start']}", "${json['end']}",
-        "${json['room']}", "${json['sport']}", "${json['type']}");
+    return TimeForm(
+        "${json['name']}",
+        "${json['start']}",
+        "${json['end']}",
+        "${json['room']}",
+        "${json['sport']}",
+        "${json['type']}",
+        "${json['approval']}");
   }
 
-  // Method to make GET parameters.
+  // Method to make GET parameters. (Added approval too)
   Map toJson() => {
         'name': name,
         'start': start,
         'end': end,
         'room': room,
         'sport': sport,
-        'type': type
+        'type': type,
+        'approval': approval
       };
 }
 
@@ -264,23 +276,34 @@ class FormController {
       //print("meow");
     }
   }
+
+  /// Async function which loads feedback from endpoint URL and returns List.
+  Future<List<TimeForm>> getFeedbackList() async {
+    return await http.get(URL).then((response) {
+      var jsonFeedback = convert.jsonDecode(response.body) as List;
+      return jsonFeedback.map((json) => TimeForm.fromJson(json)).toList();
+    });
+  }
 }
 
-void ssubmitForm(String name, String start, String end, String room) {
+void ssubmitForm(
+    String name, String start, String end, String room, String approval) {
   TimeForm timeform =
-      TimeForm(name, start, end, room, dropdownvalue, dropdownvalue2);
+      TimeForm(name, start, end, room, dropdownvalue, dropdownvalue2, approval);
 
   FormController formController = FormController();
 
   // Submit 'timeform' and save it in Google Sheets.
-  formController.submitForm(timeform, (String response) {
-    print("Response: $response");
-    if (response == FormController.STATUS_SUCCESS) {
-      // Feedback is saved succesfully in Google Sheets.
-      print("Data Submitted");
-    } else {
-      // Error Occurred while saving data in Google Sheets.
-      print("Error Occurred!");
-    }
-  });
+  if (approval == 'Y') {
+    formController.submitForm(timeform, (String response) {
+      print("Response: $response");
+      if (response == FormController.STATUS_SUCCESS) {
+        // Feedback is saved succesfully in Google Sheets.
+        print("Data Submitted");
+      } else {
+        // Error Occurred while saving data in Google Sheets.
+        print("Error Occurred!");
+      }
+    });
+  }
 }
