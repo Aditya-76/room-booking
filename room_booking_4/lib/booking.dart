@@ -4,6 +4,8 @@ import 'package:flutter/src/widgets/basic.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import 'home.dart';
+import 'package:date_format/date_format.dart';
+import 'package:intl/intl.dart';
 
 class Booking extends StatelessWidget {
   @override
@@ -27,6 +29,85 @@ class MyCustomForm extends StatefulWidget {
 // Define a corresponding State class.
 // This class holds the data related to the Form.
 class _MyCustomFormState extends State<MyCustomForm> {
+  String _setTime, _setDate;
+
+  String _hourEntry,
+      _minuteEntry,
+      _timeEntry,
+      _hourExit,
+      _minuteExit,
+      _timeExit;
+
+  String dateTime;
+
+  DateTime selectedDate = DateTime.now();
+
+  TimeOfDay selectedTime = TimeOfDay(hour: 00, minute: 00);
+
+  TextEditingController _dateController = TextEditingController();
+  TextEditingController _timeControllerEntry = TextEditingController();
+  TextEditingController _timeControllerExit = TextEditingController();
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: selectedDate,
+        initialDatePickerMode: DatePickerMode.day,
+        firstDate: DateTime(2015),
+        lastDate: DateTime(2101));
+    if (picked != null)
+      setState(() {
+        selectedDate = picked;
+        _dateController.text = DateFormat.yMd().format(selectedDate);
+      });
+  }
+
+  Future<Null> _selectTimeEntry(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _hourEntry = selectedTime.hour.toString();
+        _minuteEntry = selectedTime.minute.toString();
+        _timeEntry = _hourEntry + ' : ' + _minuteEntry;
+        _timeControllerEntry.text = _timeEntry;
+        _timeControllerEntry.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+  }
+
+  Future<Null> _selectTimeExit(BuildContext context) async {
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime,
+    );
+    if (picked != null)
+      setState(() {
+        selectedTime = picked;
+        _hourExit = selectedTime.hour.toString();
+        _minuteExit = selectedTime.minute.toString();
+        _timeExit = _hourExit + ' : ' + _minuteExit;
+        _timeControllerExit.text = _timeExit;
+        _timeControllerExit.text = formatDate(
+            DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
+            [hh, ':', nn, " ", am]).toString();
+      });
+  }
+
+  @override
+  void initState() {
+    _dateController.text = DateFormat.yMd().format(DateTime.now());
+
+    _timeControllerEntry.text = formatDate(
+        DateTime(2019, 08, 1, DateTime.now().hour, DateTime.now().minute),
+        [hh, ':', nn, " ", am]).toString();
+    super.initState();
+  }
+
   // Create a text controller and use it to retrieve the current value of the TextField.
   final myController1 = TextEditingController(); // Name
   final myController2 = TextEditingController(); // Start Time
@@ -38,11 +119,14 @@ class _MyCustomFormState extends State<MyCustomForm> {
     myController1.dispose();
     myController2.dispose();
     myController3.dispose();
+    _dateController.dispose();
+    _timeControllerEntry.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    dateTime = DateFormat.yMd().format(DateTime.now());
     return Scaffold(
       body: Column(
         children: <Widget>[
@@ -72,27 +156,128 @@ class _MyCustomFormState extends State<MyCustomForm> {
             ),
           ),
           Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Text(
+                    'Choose Date',
+                    style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      _selectDate(context);
+                    },
+                    child: Container(
+                      width: MediaQuery.of(context).size.width / 2,
+                      height: MediaQuery.of(context).size.width / 10,
+                      margin: EdgeInsets.only(top: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(color: Colors.grey[200]),
+                      child: TextFormField(
+                        style: TextStyle(fontSize: 25),
+                        textAlign: TextAlign.center,
+                        enabled: false,
+                        keyboardType: TextInputType.text,
+                        controller: _dateController,
+                        onSaved: (String val) {
+                          _setDate = val;
+                        },
+                        decoration: InputDecoration(
+                            disabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide.none),
+                            // labelText: 'Time',
+                            contentPadding: EdgeInsets.only(top: 0.0)),
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+          Container(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: myController2,
-              decoration: InputDecoration(
-                labelText: "Enter Starting Time",
-                hintText: "2021-02-21 10:00:00",
-                border: OutlineInputBorder(),
-                icon: Icon(Icons.calendar_today_rounded),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
+                  'Choose Entry Time',
+                  style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5),
+                ),
+                InkWell(
+                  onTap: () {
+                    _selectTimeEntry(context);
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2,
+                    height: MediaQuery.of(context).size.width / 10,
+                    margin: EdgeInsets.only(top: 10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: Colors.grey[200]),
+                    child: TextFormField(
+                      style: TextStyle(fontSize: 25),
+                      textAlign: TextAlign.center,
+                      onSaved: (String val) {
+                        _setTime = val;
+                      },
+                      enabled: false,
+                      keyboardType: TextInputType.text,
+                      controller: _timeControllerEntry,
+                      decoration: InputDecoration(
+                          disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                          // labelText: 'Time',
+                          contentPadding: EdgeInsets.all(5)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: myController3,
-              decoration: InputDecoration(
-                labelText: "Enter Ending Time",
-                hintText: "2021-02-21 11:00:00",
-                border: OutlineInputBorder(),
-                icon: Icon(Icons.calendar_today_rounded),
-              ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
+                  'Choose Exit Time',
+                  style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5),
+                ),
+                InkWell(
+                  onTap: () {
+                    _selectTimeExit(context);
+                  },
+                  child: Container(
+                    width: MediaQuery.of(context).size.width / 2,
+                    height: MediaQuery.of(context).size.width / 10,
+                    margin: EdgeInsets.only(top: 10),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(color: Colors.grey[200]),
+                    child: TextFormField(
+                      style: TextStyle(fontSize: 25),
+                      textAlign: TextAlign.center,
+                      onSaved: (String val) {
+                        _setTime = val;
+                      },
+                      enabled: false,
+                      keyboardType: TextInputType.text,
+                      controller: _timeControllerExit,
+                      decoration: InputDecoration(
+                          disabledBorder:
+                              UnderlineInputBorder(borderSide: BorderSide.none),
+                          // labelText: 'Time',
+                          contentPadding: EdgeInsets.all(5)),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
